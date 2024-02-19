@@ -6,6 +6,16 @@ cmake_minimum_required(VERSION 3.0)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK2/)
 add_subdirectory(Livox-SDK2)
 
+include_directories(
+  ./
+  ${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK2/sdk_core/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK2/include
+)
+link_directories(
+  ./
+  ${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK2/build/sdk_core
+)
+
 #---------------------------------------------------------------------------------------
 # Start livox_ros_driver2 project
 #---------------------------------------------------------------------------------------
@@ -91,36 +101,6 @@ endif()
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-
-## make sure the livox_lidar_sdk_static library is installed
-find_library(LIVOX_LIDAR_SDK_LIBRARY  liblivox_lidar_sdk_static.a    /usr/local/lib)
-
-if((NOT LIVOX_LIDAR_SDK_LIBRARY) OR (NOT EXISTS ${LIVOX_LIDAR_SDK_LIBRARY}))
-
-	execute_process(COMMAND cmake .. WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK2/build OUTPUT_VARIABLE cmd_res)
-	FOREACH(res ${cmd_res})
-		MESSAGE(${res})
-	ENDFOREACH()
-
-	execute_process(COMMAND make WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK2/build OUTPUT_VARIABLE cmd_res)
-	FOREACH(res ${cmd_res})
-		MESSAGE(${res})
-	ENDFOREACH()
-
-	include_directories(
-		./
-		${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK2/sdk_core/include
-	)
-
-	link_directories(
-		./
-		${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK2/build/sdk_core
-	)
-else()
-	message("find livox sdk library success")
-endif()
-
-
 
 ## PCL library
 link_directories(${PCL_LIBRARY_DIRS})
