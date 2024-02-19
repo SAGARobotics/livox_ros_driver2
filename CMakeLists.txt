@@ -3,6 +3,8 @@
 cmake_minimum_required(VERSION 3.0)
 
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK2/)
+
 #---------------------------------------------------------------------------------------
 # Start livox_ros_driver2 project
 #---------------------------------------------------------------------------------------
