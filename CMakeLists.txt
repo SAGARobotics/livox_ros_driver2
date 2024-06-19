@@ -1,25 +1,5 @@
-# Copyright(c) 2019 livoxtech limited.
-
 cmake_minimum_required(VERSION 3.0)
 
-
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK2/)
-add_subdirectory(Livox-SDK2)
-
-include_directories(
-  ./
-  ${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK2/sdk_core/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK2/include
-)
-link_directories(
-  ./
-  ${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK2/build/sdk_core
-)
-
-#---------------------------------------------------------------------------------------
-# Start livox_ros_driver2 project
-#---------------------------------------------------------------------------------------
-include(cmake/version.cmake)
 project(livox_ros_driver2 VERSION ${LIVOX_ROS_DRIVER2_VERSION} LANGUAGES CXX)
 message(STATUS "livox_ros_driver2 version: ${LIVOX_ROS_DRIVER2_VERSION}")
 
@@ -28,16 +8,14 @@ message(STATUS "livox_ros_driver2 version: ${LIVOX_ROS_DRIVER2_VERSION}")
 #---------------------------------------------------------------------------------------
 add_definitions(-DBUILDING_ROS1)
 
-
 #---------------------------------------------------------------------------------------
-# find package and the dependecy
+# find package and the dependency
 #---------------------------------------------------------------------------------------
 find_package(Boost 1.54 REQUIRED COMPONENTS
   system
   thread
   chrono
 )
-
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -53,7 +31,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## Find pcl lib
-find_package(PCL REQUIRED)
+find_package(PCL REQUIRED COMPONENTS common io)
 
 ## Generate messages in the 'msg' folder
 add_message_files(FILES
@@ -80,9 +58,9 @@ endif (APR_FOUND)
 ## The catkin_package macro generates cmake config files for your package
 ## Declare things to be passed to dependent projects
 ## INCLUDE_DIRS: uncomment this if your package contains header files
-## LIBRARIES: libraries you create in this project that dependent projects als    o need
+## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
-## DEPENDS: system dependencies of this project that dependent projects also n    eed
+## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(CATKIN_DEPENDS
   roscpp rospy std_msgs message_runtime
   pcl_ros
@@ -107,29 +85,18 @@ link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
 #---------------------------------------------------------------------------------------
-# generate excutable and add libraries
+# Include and build Livox-SDK2
+#---------------------------------------------------------------------------------------
+add_subdirectory(Livox-SDK2)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK2/include)
+
+# Add the path to the custom shared library
+link_directories(${CATKIN_DEVEL_PREFIX}/lib)
+
+#---------------------------------------------------------------------------------------
+# generate executable and add libraries
 #---------------------------------------------------------------------------------------
 add_executable(${PROJECT_NAME}_node
-  ""
-)
-
-#---------------------------------------------------------------------------------------
-# precompile macro and compile option
-#---------------------------------------------------------------------------------------
-target_compile_options(${PROJECT_NAME}_node
-  PRIVATE $<$<CXX_COMPILER_ID:GNU>:-Wall>
-)
-
-#---------------------------------------------------------------------------------------
-# add projects that depend on
-#---------------------------------------------------------------------------------------
-add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME}_generate_messages_cpp)
-
-#---------------------------------------------------------------------------------------
-# source file
-#---------------------------------------------------------------------------------------
-target_sources(${PROJECT_NAME}_node
-  PRIVATE
   src/driver_node.cpp
   src/lds.cpp
   src/lds_lidar.cpp
@@ -151,6 +118,18 @@ target_sources(${PROJECT_NAME}_node
 )
 
 #---------------------------------------------------------------------------------------
+# precompile macro and compile option
+#---------------------------------------------------------------------------------------
+target_compile_options(${PROJECT_NAME}_node
+  PRIVATE $<$<CXX_COMPILER_ID:GNU>:-Wall>
+)
+
+#---------------------------------------------------------------------------------------
+# add projects that depend on
+#---------------------------------------------------------------------------------------
+add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME}_generate_messages_cpp)
+
+#---------------------------------------------------------------------------------------
 # include file
 #---------------------------------------------------------------------------------------
 target_include_directories(${PROJECT_NAME}_node
@@ -158,22 +137,21 @@ target_include_directories(${PROJECT_NAME}_node
   ${catkin_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
   ${APR_INCLUDE_DIRS}
-  3rdparty
-  src
-  livox_ros_driver2
+  ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${CMAKE_CURRENT_SOURCE_DIR}/livox_ros_driver2
 )
 
 #---------------------------------------------------------------------------------------
 # link libraries
 #---------------------------------------------------------------------------------------
 target_link_libraries(${PROJECT_NAME}_node
-  livox_lidar_sdk_static.a
-  ${Boost_LIBRARY}
+  livox_lidar_sdk_shared
+  ${Boost_LIBRARIES}
   ${catkin_LIBRARIES}
   ${PCL_LIBRARIES}
   ${APR_LIBRARIES}
-  ${LIVOX_SDK_LIBRARY}
-  )
+)
 
 #---------------------------------------------------------------------------------------
 # Install
@@ -185,8 +163,8 @@ install(TARGETS ${PROJECT_NAME}_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(DIRECTORY launch_ROS1/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch_ROS1
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
 )
 
 #---------------------------------------------------------------------------------------
