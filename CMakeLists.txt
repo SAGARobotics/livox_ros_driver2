@@ -117,6 +117,10 @@ add_executable(${PROJECT_NAME}_node
   src/call_back/livox_lidar_callback.cpp
 )
 
+add_executable(${PROJECT_NAME}_ip_set
+  examples/set_livox_ip.cpp
+)
+
 #---------------------------------------------------------------------------------------
 # precompile macro and compile option
 #---------------------------------------------------------------------------------------
@@ -142,10 +146,28 @@ target_include_directories(${PROJECT_NAME}_node
   ${CMAKE_CURRENT_SOURCE_DIR}/livox_ros_driver2
 )
 
+target_include_directories(${PROJECT_NAME}_ip_set
+  PUBLIC
+  ${catkin_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
+  ${APR_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${CMAKE_CURRENT_SOURCE_DIR}/livox_ros_driver2
+)
+
 #---------------------------------------------------------------------------------------
 # link libraries
 #---------------------------------------------------------------------------------------
 target_link_libraries(${PROJECT_NAME}_node
+  livox_lidar_sdk_shared
+  ${Boost_LIBRARIES}
+  ${catkin_LIBRARIES}
+  ${PCL_LIBRARIES}
+  ${APR_LIBRARIES}
+)
+
+target_link_libraries(${PROJECT_NAME}_ip_set
   livox_lidar_sdk_shared
   ${Boost_LIBRARIES}
   ${catkin_LIBRARIES}
@@ -158,6 +180,12 @@ target_link_libraries(${PROJECT_NAME}_node
 #---------------------------------------------------------------------------------------
 
 install(TARGETS ${PROJECT_NAME}_node
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(TARGETS ${PROJECT_NAME}_ip_set
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
