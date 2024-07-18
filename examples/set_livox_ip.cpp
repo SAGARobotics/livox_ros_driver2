@@ -40,7 +40,7 @@ void RebootCallback(livox_status status, uint32_t handle, LivoxLidarRebootRespon
   if (response == nullptr) {
     return;
   }
-  printf("RebootCallback, status:%u, handle:%u, ret_code:%u",
+  // printf("RebootCallback, status:%u, handle:%u, ret_code:%u",
       status, handle, response->ret_code);
 }
 
@@ -48,7 +48,7 @@ void SetIpInfoCallback(livox_status status, uint32_t handle, LivoxLidarAsyncCont
   if (response == nullptr) {
     return;
   }
-  printf("LivoxLidarIpInfoCallback, status:%u, handle:%u, ret_code:%u, error_key:%u",
+  // printf("LivoxLidarIpInfoCallback, status:%u, handle:%u, ret_code:%u, error_key:%u",
       status, handle, response->ret_code, response->error_key);
 
   if (response->ret_code == 0 && response->error_key == 0) {
@@ -62,10 +62,12 @@ void LidarInfoChangeCallback(const uint32_t handle, const LivoxLidarInfo* info, 
     printf("lidar info change callback failed, the info is nullptr.\n");
     return;
   }
-  printf("LidarInfoChangeCallback Lidar handle: %u SN: %s\n", handle, info->sn);
 
   if(info->lidar_ip == current_ip)
   {
+    printf("LidarInfoChangeCallback Lidar handle: %u SN: %s\n", handle, info->sn);
+    printf("Livox Lidar found: %s\n", info->lidar_ip);
+
     LivoxLidarIpInfo lidar_ip_info;
     strcpy(lidar_ip_info.ip_addr, desired_ip.c_str());
     strcpy(lidar_ip_info.net_mask, "255.255.255.0");
@@ -95,6 +97,6 @@ int main(int argc, const char *argv[]) {
   sleep(5);
 
   LivoxLidarSdkUninit();
-  printf("Livox Quick Start Demo End!\n");
+  printf("Livox IP reconfigured!\n");
   return 0;
 }
