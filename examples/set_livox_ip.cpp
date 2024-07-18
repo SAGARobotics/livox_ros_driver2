@@ -34,7 +34,7 @@
 #include <chrono>
 #include <iostream>
 
-std::string desired_ip;
+std::string current_ip, desired_ip;
 
 void RebootCallback(livox_status status, uint32_t handle, LivoxLidarRebootResponse* response, void* client_data) {
   if (response == nullptr) {
@@ -64,12 +64,14 @@ void LidarInfoChangeCallback(const uint32_t handle, const LivoxLidarInfo* info, 
   }
   printf("LidarInfoChangeCallback Lidar handle: %u SN: %s\n", handle, info->sn);
 
-  LivoxLidarIpInfo lidar_ip_info;
-  strcpy(lidar_ip_info.ip_addr, desired_ip.c_str());
-  strcpy(lidar_ip_info.net_mask, "255.255.255.0");
-  strcpy(lidar_ip_info.gw_addr, "192.168.0.1");
-  SetLivoxLidarIp(handle, &lidar_ip_info, SetIpInfoCallback, nullptr);
-
+  if(info->lidar_ip == current_ip)
+  {
+    LivoxLidarIpInfo lidar_ip_info;
+    strcpy(lidar_ip_info.ip_addr, desired_ip.c_str());
+    strcpy(lidar_ip_info.net_mask, "255.255.255.0");
+    strcpy(lidar_ip_info.gw_addr, "192.168.0.1");
+    SetLivoxLidarIp(handle, &lidar_ip_info, SetIpInfoCallback, nullptr);
+  }
 }
 
 int main(int argc, const char *argv[]) {
@@ -77,7 +79,8 @@ int main(int argc, const char *argv[]) {
     printf("Params Invalid, must input config path.\n");
     return -1;
   }
-  std::string config = argv[1];
+  std::string config = "mid360_config.json";
+  current_ip = argv[1];
   desired_ip = argv[2];
 
   // REQUIRED, to init Livox SDK2
@@ -89,11 +92,8 @@ int main(int argc, const char *argv[]) {
 
   SetLivoxLidarInfoChangeCallback(LidarInfoChangeCallback, nullptr);
 
-#ifdef WIN32
-  Sleep(300000);
-#else
-  sleep(300);
-#endif
+  sleep(5);
+
   LivoxLidarSdkUninit();
   printf("Livox Quick Start Demo End!\n");
   return 0;
