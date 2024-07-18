@@ -40,17 +40,12 @@ void RebootCallback(livox_status status, uint32_t handle, LivoxLidarRebootRespon
   if (response == nullptr) {
     return;
   }
-  // printf("RebootCallback, status:%u, handle:%u, ret_code:%u",
-      status, handle, response->ret_code);
 }
 
 void SetIpInfoCallback(livox_status status, uint32_t handle, LivoxLidarAsyncControlResponse *response, void *client_data) {
   if (response == nullptr) {
     return;
   }
-  // printf("LivoxLidarIpInfoCallback, status:%u, handle:%u, ret_code:%u, error_key:%u",
-      status, handle, response->ret_code, response->error_key);
-
   if (response->ret_code == 0 && response->error_key == 0) {
     LivoxLidarRequestReboot(handle, RebootCallback, nullptr);
   }
