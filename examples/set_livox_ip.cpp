@@ -22,6 +22,8 @@
 // SOFTWARE.
 //
 
+#include <ros/ros.h>
+#include <ros/package.h>
 #include "livox_lidar_def.h"
 #include "livox_lidar_api.h"
 #include <unistd.h>
@@ -76,7 +78,9 @@ int main(int argc, const char *argv[]) {
     printf("Params Invalid, must input config path.\n");
     return -1;
   }
-  std::string config = "mid360_config.json";
+  std::string package_path = ros::package::getPath("livox_ros_driver2");
+
+  std::string config = package_path + "/examples/mid360_config.json";
   current_ip = argv[1];
   desired_ip = argv[2];
 
