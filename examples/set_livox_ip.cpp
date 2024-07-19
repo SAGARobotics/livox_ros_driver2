@@ -22,6 +22,8 @@
 // SOFTWARE.
 //
 
+#include <ros/ros.h>
+#include <ros/package.h>
 #include "livox_lidar_def.h"
 #include "livox_lidar_api.h"
 #include <unistd.h>
@@ -34,23 +36,18 @@
 #include <chrono>
 #include <iostream>
 
-std::string desired_ip;
+std::string current_ip, desired_ip;
 
 void RebootCallback(livox_status status, uint32_t handle, LivoxLidarRebootResponse* response, void* client_data) {
   if (response == nullptr) {
     return;
   }
-  printf("RebootCallback, status:%u, handle:%u, ret_code:%u",
-      status, handle, response->ret_code);
 }
 
 void SetIpInfoCallback(livox_status status, uint32_t handle, LivoxLidarAsyncControlResponse *response, void *client_data) {
   if (response == nullptr) {
     return;
   }
-  printf("LivoxLidarIpInfoCallback, status:%u, handle:%u, ret_code:%u, error_key:%u",
-      status, handle, response->ret_code, response->error_key);
-
   if (response->ret_code == 0 && response->error_key == 0) {
     LivoxLidarRequestReboot(handle, RebootCallback, nullptr);
   }
@@ -62,14 +59,18 @@ void LidarInfoChangeCallback(const uint32_t handle, const LivoxLidarInfo* info, 
     printf("lidar info change callback failed, the info is nullptr.\n");
     return;
   }
-  printf("LidarInfoChangeCallback Lidar handle: %u SN: %s\n", handle, info->sn);
 
-  LivoxLidarIpInfo lidar_ip_info;
-  strcpy(lidar_ip_info.ip_addr, desired_ip.c_str());
-  strcpy(lidar_ip_info.net_mask, "255.255.255.0");
-  strcpy(lidar_ip_info.gw_addr, "192.168.0.1");
-  SetLivoxLidarIp(handle, &lidar_ip_info, SetIpInfoCallback, nullptr);
+  if(info->lidar_ip == current_ip)
+  {
+    printf("LidarInfoChangeCallback Lidar handle: %u SN: %s\n", handle, info->sn);
+    printf("Livox Lidar found: %s\n", info->lidar_ip);
 
+    LivoxLidarIpInfo lidar_ip_info;
+    strcpy(lidar_ip_info.ip_addr, desired_ip.c_str());
+    strcpy(lidar_ip_info.net_mask, "255.255.255.0");
+    strcpy(lidar_ip_info.gw_addr, "192.168.0.1");
+    SetLivoxLidarIp(handle, &lidar_ip_info, SetIpInfoCallback, nullptr);
+  }
 }
 
 int main(int argc, const char *argv[]) {
@@ -77,7 +78,10 @@ int main(int argc, const char *argv[]) {
     printf("Params Invalid, must input config path.\n");
     return -1;
   }
-  std::string config = argv[1];
+  std::string package_path = ros::package::getPath("livox_ros_driver2");
+
+  std::string config = package_path + "/examples/mid360_config.json";
+  current_ip = argv[1];
   desired_ip = argv[2];
 
   // REQUIRED, to init Livox SDK2
@@ -89,12 +93,9 @@ int main(int argc, const char *argv[]) {
 
   SetLivoxLidarInfoChangeCallback(LidarInfoChangeCallback, nullptr);
 
-#ifdef WIN32
-  Sleep(300000);
-#else
-  sleep(300);
-#endif
+  sleep(5);
+
   LivoxLidarSdkUninit();
-  printf("Livox Quick Start Demo End!\n");
+  printf("Livox IP reconfigured!\n");
   return 0;
 }
