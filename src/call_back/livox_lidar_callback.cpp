@@ -55,6 +55,12 @@ void LivoxLidarCallback::LidarInfoChangeCallback(const uint32_t handle,
     // set the lidar according to the user-defined config
     const UserLivoxLidarConfig& config = lidar_device->livox_config;
 
+    std::string serial_number(info->sn);
+    std::string ip(info->sn);
+
+    lidar_device->info.sn = serial_number;
+    lidar_device->info.lidar_ip = ip;
+
     // lock for modify the lidar device set_bits
     {
       std::lock_guard<std::mutex> lock(lds_lidar->config_mutex_);
@@ -131,7 +137,7 @@ void LivoxLidarCallback::SetDataTypeCallback(livox_status status, uint32_t handl
               << handle << std::endl;
     return;
   }
-  LdsLidar* lds_lidar = static_cast<LdsLidar*>(client_data);
+    LdsLidar* lds_lidar = static_cast<LdsLidar*>(client_data);
 
   if (status == kLivoxLidarStatusSuccess) {
     std::lock_guard<std::mutex> lock(lds_lidar->config_mutex_);

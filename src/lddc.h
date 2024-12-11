@@ -52,6 +52,7 @@ typedef enum {
 using Publisher = ros::Publisher;
 using PublisherPtr = ros::Publisher*;
 using PointCloud2 = sensor_msgs::PointCloud2;
+using String = std_msgs::String;
 using PointField = sensor_msgs::PointField;
 using CustomMsg = livox_ros_driver2::CustomMsg;
 using CustomPoint = livox_ros_driver2::CustomPoint;
@@ -110,6 +111,7 @@ class Lddc final {
   void InitPointcloud2MsgHeader(PointCloud2& cloud, const std::string& frame_id);
   void InitPointcloud2Msg(const StoragePacket& pkg, PointCloud2& cloud, uint64_t& timestamp, const std::string& frame_id);
   void PublishPointcloud2Data(const uint8_t index, uint64_t timestamp, const PointCloud2& cloud);
+  void PublishMetaData(const uint8_t index, const std::string& serial_number);
 
   void InitCustomMsg(CustomMsg& livox_msg, const StoragePacket& pkg, uint8_t index, const std::string& frame_id);
   void FillPointsToCustomMsg(CustomMsg& livox_msg, const StoragePacket& pkg);
@@ -145,9 +147,11 @@ class Lddc final {
   bool enable_lidar_bag_;
   bool enable_imu_bag_;
   PublisherPtr private_pub_[kMaxSourceLidar];
+  PublisherPtr private_meta_pub_[kMaxSourceLidar];
   PublisherPtr global_pub_;
   PublisherPtr private_imu_pub_[kMaxSourceLidar];
   PublisherPtr global_imu_pub_;
+  PublisherPtr global_meta_pub_;
   rosbag::Bag *bag_;
 #elif defined BUILDING_ROS2
   PublisherPtr private_pub_[kMaxSourceLidar];
