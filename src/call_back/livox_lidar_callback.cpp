@@ -114,6 +114,31 @@ void LivoxLidarCallback::LidarInfoChangeCallback(const uint32_t handle,
   return;
 }
 
+void LivoxLidarCallback::LivoxLidarFirmwareVerCb(livox_status status, uint32_t handle,
+        LivoxLidarDiagInternalInfoResponse* response, void* client_data) {
+  if (client_data == nullptr) {
+    std::cout << "lidar info change callback failed, client data is nullptr" << std::endl;
+    return;
+  }
+  LdsLidar* lds_lidar = static_cast<LdsLidar*>(client_data);
+
+  LidarDevice* lidar_device = GetLidarDevice(handle, client_data);
+  if (lidar_device == nullptr) {
+    std::cout << "found lidar not defined in the user-defined config, ip: " << IpNumToString(handle) << std::endl;
+    // add lidar device
+    uint8_t index = 0;
+    int8_t ret = lds_lidar->cache_index_.GetFreeIndex(kLivoxLidarType, handle, index);
+    if (ret != 0) {
+      std::cout << "failed to add lidar device, lidar ip: " << IpNumToString(handle) << std::endl;
+      return;
+    }
+    LidarDevice *p_lidar = &(lds_lidar->lidars_[index]);
+    p_lidar->lidar_type = kLivoxLidarType;
+  }
+
+  return;
+}
+
 void LivoxLidarCallback::WorkModeChangedCallback(livox_status status,
                                                  uint32_t handle,
                                                  LivoxLidarAsyncControlResponse *response,
