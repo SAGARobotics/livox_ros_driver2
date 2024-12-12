@@ -245,6 +245,11 @@ void Lddc::PublishMetaData(const uint8_t index, const std::string& serial_number
         name_str, queue_size);
   }
 
+  // Query firmware version
+  std::string firmware_version = "unknown";
+  QueryLivoxLidarFirmwareVer(lds_->lidars_[index].handle, LivoxLidarCallback::FirmwareVersionCallback, &firmware_version);
+
+
   // Manually create a JSON string
   std::ostringstream json_stream;
   json_stream << "{"
