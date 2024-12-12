@@ -55,6 +55,7 @@ Lddc::Lddc(int format, int multi_topic, int data_src, int output_type,
   publish_period_ns_ = kNsPerSecond / publish_frq_;
   lds_ = nullptr;
   memset(private_pub_, 0, sizeof(private_pub_));
+  memset(private_meta_pub_, 0, sizeof(private_meta_pub_));
   memset(private_imu_pub_, 0, sizeof(private_imu_pub_));
   global_pub_ = nullptr;
   global_imu_pub_ = nullptr;
@@ -95,6 +96,12 @@ Lddc::~Lddc() {
   for (uint32_t i = 0; i < kMaxSourceLidar; i++) {
     if (private_pub_[i]) {
       delete private_pub_[i];
+    }
+  }
+
+  for (uint32_t i = 0; i < kMaxSourceLidar; i++) {
+    if (private_meta_pub_[i]) {
+      delete private_meta_pub_[i];
     }
   }
 
