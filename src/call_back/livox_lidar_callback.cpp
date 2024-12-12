@@ -108,17 +108,28 @@ void LivoxLidarCallback::LidarInfoChangeCallback(const uint32_t handle,
                                  LivoxLidarCallback::SetAttitudeCallback, lds_lidar);
   }
 
+  QueryLivoxLidarFirmwareVer(handle, LivoxLidarCallback::FirmwareVersionCallback, lds_lidar);
+
   std::cout << "begin to change work mode to 'Normal', handle: " << handle << std::endl;
   SetLivoxLidarWorkMode(handle, kLivoxLidarNormal, WorkModeChangedCallback, nullptr);
   EnableLivoxLidarImuData(handle, LivoxLidarCallback::EnableLivoxLidarImuDataCallback, lds_lidar);
   return;
 }
 
-void LivoxLidarCallback::FirmwareVersionCallback(livox_status status, uint32_t handle, LivoxLidarDiagInternalInfoResponse* response, void* client_data) {
+void LivoxLidarCallback::FirmwareVersionCallback(livox_status status, uint32_t handle, LivoxLidarDiagInternalInfoResponse* response, void* client_data)
+{
+  if (client_data == nullptr)
+  {
+    std::cout << "lidar firmware version callback failed, client data is nullptr" << std::endl;
+    return;
+  }
+
+  LidarDevice* lidar_device = GetLidarDevice(handle, client_data);
+  if (lidar_device != nullptr)
+  {
     std::string firmware_version;
-    // *firmware_version = std::to_string(response->data[0]) + "." +
-    //                     std::to_string(response->data[0]) + "." +
-    //                   std::to_string(response->data[0]);
+    lidar_device->info.fw_version = firmware_version;
+  }
 }
 
 void LivoxLidarCallback::WorkModeChangedCallback(livox_status status,

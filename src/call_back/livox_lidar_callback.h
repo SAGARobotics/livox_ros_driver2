@@ -61,7 +61,9 @@ class LivoxLidarCallback {
   static void EnableLivoxLidarImuDataCallback(livox_status status, uint32_t handle,
                                   LivoxLidarAsyncControlResponse *response,
                                   void *client_data);
-  static void FirmwareVersionCallback(livox_status status, uint32_t handle, LivoxLidarDiagInternalInfoResponse* response, void* client_data);
+  static void FirmwareVersionCallback(livox_status status, uint32_t handle,
+                                  LivoxLidarDiagInternalInfoResponse* response,
+                                  void* client_data);
 
  private:
   static LidarDevice* GetLidarDevice(const uint32_t handle, void* client_data);
