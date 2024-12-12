@@ -157,6 +157,9 @@ bool LdsLidar::InitLivoxLidar() {
     p_lidar->livox_config = config;
     p_lidar->handle = config.handle;
 
+    // std::string firmware_version = "unknown";
+    QueryLivoxLidarFirmwareVer(config.handle, LivoxLidarCallback::FirmwareVersionCallback, g_lds_ldiar);
+
     LidarExtParameter lidar_param;
     lidar_param.handle = config.handle;
     lidar_param.lidar_type = kLivoxLidarType;

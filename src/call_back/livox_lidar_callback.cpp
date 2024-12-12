@@ -114,15 +114,11 @@ void LivoxLidarCallback::LidarInfoChangeCallback(const uint32_t handle,
   return;
 }
 
-void FirmwareVersionCallback(livox_status status, uint32_t handle, LivoxLidarFirmwareVerResponse* response, void* client_data) {
-  if (status == kStatusSuccess && response) {
-    std::string* firmware_version = static_cast<std::string*>(client_data);
-    *firmware_version = std::to_string(response->firmware_version[0]) + "." +
-                        std::to_string(response->firmware_version[1]) + "." +
-                        std::to_string(response->firmware_version[2]);
-  } else {
-    std::cerr << "Failed to get firmware version" << std::endl;
-  }
+void LivoxLidarCallback::FirmwareVersionCallback(livox_status status, uint32_t handle, LivoxLidarDiagInternalInfoResponse* response, void* client_data) {
+    std::string firmware_version;
+    // *firmware_version = std::to_string(response->data[0]) + "." +
+    //                     std::to_string(response->data[0]) + "." +
+    //                   std::to_string(response->data[0]);
 }
 
 void LivoxLidarCallback::WorkModeChangedCallback(livox_status status,

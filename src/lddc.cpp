@@ -38,6 +38,8 @@
 #include "lds_lidar.h"
 #include <string>
 
+// #include "call_back/livox_lidar_callback.h"
+
 namespace livox_ros {
 
 /** Lidar Data Distribute Control--------------------------------------------*/
@@ -244,10 +246,6 @@ void Lddc::PublishMetaData(const uint8_t index, const std::string& serial_number
         "%s publish use String format, set ROS publisher queue size %d",
         name_str, queue_size);
   }
-
-  // Query firmware version
-  std::string firmware_version = "unknown";
-  QueryLivoxLidarFirmwareVer(lds_->lidars_[index].handle, LivoxLidarCallback::FirmwareVersionCallback, &firmware_version);
 
 
   // Manually create a JSON string
