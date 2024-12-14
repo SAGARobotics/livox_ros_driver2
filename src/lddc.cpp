@@ -55,6 +55,7 @@ Lddc::Lddc(int format, int multi_topic, int data_src, int output_type,
   publish_period_ns_ = kNsPerSecond / publish_frq_;
   lds_ = nullptr;
   memset(private_pub_, 0, sizeof(private_pub_));
+  memset(private_meta_pub_, 0, sizeof(private_meta_pub_));
   memset(private_imu_pub_, 0, sizeof(private_imu_pub_));
   global_pub_ = nullptr;
   global_imu_pub_ = nullptr;
@@ -99,6 +100,12 @@ Lddc::~Lddc() {
   }
 
   for (uint32_t i = 0; i < kMaxSourceLidar; i++) {
+    if (private_meta_pub_[i]) {
+      delete private_meta_pub_[i];
+    }
+  }
+
+  for (uint32_t i = 0; i < kMaxSourceLidar; i++) {
     if (private_imu_pub_[i]) {
       delete private_imu_pub_[i];
     }
@@ -125,7 +132,7 @@ void Lddc::DistributePointCloudData(void) {
     std::cout << "DistributePointCloudData is RequestExit" << std::endl;
     return;
   }
-  
+
   lds_->pcd_semaphore_.Wait();
   for (uint32_t i = 0; i < lds_->lidar_count_; i++) {
     uint32_t lidar_id = i;
@@ -134,7 +141,7 @@ void Lddc::DistributePointCloudData(void) {
     if ((kConnectStateSampling != lidar->connect_state) || (p_queue == nullptr)) {
       continue;
     }
-    PollingLidarPointCloudData(lidar_id, lidar);    
+    PollingLidarPointCloudData(lidar_id, lidar);
   }
 }
 
@@ -147,7 +154,7 @@ void Lddc::DistributeImuData(void) {
     std::cout << "DistributeImuData is RequestExit" << std::endl;
     return;
   }
-  
+
   lds_->imu_semaphore_.Wait();
   for (uint32_t i = 0; i < lds_->lidar_count_; i++) {
     uint32_t lidar_id = i;
@@ -170,6 +177,8 @@ void Lddc::PollingLidarPointCloudData(uint8_t index, LidarDevice *lidar) {
     if (kPointCloud2Msg == transfer_format_) {
       // PublishPointcloud2(p_queue, index);
       PublishPointcloud2(p_queue, index, lidar->livox_config.frame_id);
+      PublishMetaData(index, lidar->info.sn );
+
     } else if (kLivoxCustomMsg == transfer_format_) {
       PublishCustomPointcloud(p_queue, index, lidar->livox_config.frame_id);
     } else if (kPclPxyziMsg == transfer_format_) {
@@ -198,6 +207,63 @@ void Lddc::PrepareExit(void) {
     lds_->PrepareExit();
     lds_ = nullptr;
   }
+}
+
+void Lddc::PublishMetaData(const uint8_t index, const std::string& serial_number) {
+  ros::Publisher **pub = nullptr;
+  uint32_t queue_size = kMinEthPacketQueueSize;
+
+  if (use_multi_topic_)
+  {
+    pub = &private_meta_pub_[index];
+    queue_size = queue_size / 8; // queue size is 4 for only one lidar
+  }
+  else
+  {
+    pub = &global_meta_pub_;
+    queue_size = queue_size * 8; // shared queue size is 256, for all lidars
+  }
+
+  if (*pub == nullptr) {
+    char name_str[48];
+    memset(name_str, 0, sizeof(name_str));
+    if (use_multi_topic_) {
+      std::string ip_string = IpNumToString(lds_->lidars_[index].handle);
+      snprintf(name_str, sizeof(name_str), "livox/metadata_%s",
+               ReplacePeriodByUnderline(ip_string).c_str());
+      DRIVER_INFO(*cur_node_, "Support multi topics.");
+    } else {
+      DRIVER_INFO(*cur_node_, "Support only one topic.");
+      snprintf(name_str, sizeof(name_str), "livox/metadata");
+    }
+
+    *pub = new ros::Publisher;
+    **pub =
+        cur_node_->GetNode().advertise<String>(name_str, queue_size);
+    DRIVER_INFO(*cur_node_,
+        "%s publish use String format, set ROS publisher queue size %d",
+        name_str, queue_size);
+  }
+
+  // Manually create a JSON string
+  std::ostringstream json_stream;
+  json_stream << "{"
+              << "\"sensor_info\": {"
+              << "\"prod_line\": \"" << "MID360" << "\","
+              << "\"build_rev\": \"" << "0.0.0" << "\","
+              << "\"prod_sn\": \"" << serial_number << "\","
+              << "\"prod_pn\": \"" << "0.0.0" << "\""
+              << "}"
+              << "}";
+
+  std::string json_string = json_stream.str();
+
+  // Create a ROS message
+  String msg;
+  msg.data = json_string;
+
+  // Publish the message
+  (*pub)->publish(msg);
 }
 
 void Lddc::PublishPointcloud2(LidarDataQueue *queue, uint8_t index, const std::string& frame_id) {
@@ -430,7 +496,7 @@ void Lddc::InitPclMsg(const StoragePacket& pkg, PointCloud& cloud, uint64_t& tim
   cloud.header.stamp = timestamp / 1000.0;  // to pcl ros time stamp
 #elif defined BUILDING_ROS2
   std::cout << "warning: pcl::PointCloud is not supported in ROS2, "
-            << "please check code logic" 
+            << "please check code logic"
             << std::endl;
 #endif
   return;
@@ -455,7 +521,7 @@ void Lddc::FillPointsToPclMsg(const StoragePacket& pkg, PointCloud& pcl_msg) {
   }
 #elif defined BUILDING_ROS2
   std::cout << "warning: pcl::PointCloud is not supported in ROS2, "
-            << "please check code logic" 
+            << "please check code logic"
             << std::endl;
 #endif
   return;
@@ -473,7 +539,7 @@ void Lddc::PublishPclData(const uint8_t index, const uint64_t timestamp, const P
   }
 #elif defined BUILDING_ROS2
   std::cout << "warning: pcl::PointCloud is not supported in ROS2, "
-            << "please check code logic" 
+            << "please check code logic"
             << std::endl;
 #endif
   return;
