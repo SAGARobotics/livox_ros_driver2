@@ -210,60 +210,60 @@ void Lddc::PrepareExit(void) {
 }
 
 void Lddc::PublishMetaData(const uint8_t index, const std::string& serial_number) {
-  ros::Publisher **pub = nullptr;
-  uint32_t queue_size = kMinEthPacketQueueSize;
+  // ros::Publisher **pub = nullptr;
+  // uint32_t queue_size = kMinEthPacketQueueSize;
 
-  if (use_multi_topic_)
-  {
-    pub = &private_meta_pub_[index];
-    queue_size = queue_size / 8; // queue size is 4 for only one lidar
-  }
-  else
-  {
-    pub = &global_meta_pub_;
-    queue_size = queue_size * 8; // shared queue size is 256, for all lidars
-  }
+  // if (use_multi_topic_)
+  // {
+  //   pub = &private_meta_pub_[index];
+  //   queue_size = queue_size / 8; // queue size is 4 for only one lidar
+  // }
+  // else
+  // {
+  //   pub = &global_meta_pub_;
+  //   queue_size = queue_size * 8; // shared queue size is 256, for all lidars
+  // }
 
-  if (*pub == nullptr) {
-    char name_str[48];
-    memset(name_str, 0, sizeof(name_str));
-    if (use_multi_topic_) {
-      std::string ip_string = IpNumToString(lds_->lidars_[index].handle);
-      snprintf(name_str, sizeof(name_str), "livox/metadata_%s",
-               ReplacePeriodByUnderline(ip_string).c_str());
-      DRIVER_INFO(*cur_node_, "Support multi topics.");
-    } else {
-      DRIVER_INFO(*cur_node_, "Support only one topic.");
-      snprintf(name_str, sizeof(name_str), "livox/metadata");
-    }
+  // if (*pub == nullptr) {
+  //   char name_str[48];
+  //   memset(name_str, 0, sizeof(name_str));
+  //   if (use_multi_topic_) {
+  //     std::string ip_string = IpNumToString(lds_->lidars_[index].handle);
+  //     snprintf(name_str, sizeof(name_str), "livox/metadata_%s",
+  //              ReplacePeriodByUnderline(ip_string).c_str());
+  //     DRIVER_INFO(*cur_node_, "Support multi topics.");
+  //   } else {
+  //     DRIVER_INFO(*cur_node_, "Support only one topic.");
+  //     snprintf(name_str, sizeof(name_str), "livox/metadata");
+  //   }
 
-    *pub = new ros::Publisher;
-    **pub =
-        cur_node_->GetNode().advertise<String>(name_str, queue_size);
-    DRIVER_INFO(*cur_node_,
-        "%s publish use String format, set ROS publisher queue size %d",
-        name_str, queue_size);
-  }
+  //   *pub = new ros::Publisher;
+  //   **pub =
+  //       cur_node_->GetNode().advertise<String>(name_str, queue_size);
+  //   DRIVER_INFO(*cur_node_,
+  //       "%s publish use String format, set ROS publisher queue size %d",
+  //       name_str, queue_size);
+  // }
 
   // Manually create a JSON string
-  std::ostringstream json_stream;
-  json_stream << "{"
-              << "\"sensor_info\": {"
-              << "\"prod_line\": \"" << "MID360" << "\","
-              << "\"build_rev\": \"" << "0.0.0" << "\","
-              << "\"prod_sn\": \"" << serial_number << "\","
-              << "\"prod_pn\": \"" << "0.0.0" << "\""
-              << "}"
-              << "}";
+  // std::ostringstream json_stream;
+  // json_stream << "{"
+  //             << "\"sensor_info\": {"
+  //             << "\"prod_line\": \"" << "MID360" << "\","
+  //             << "\"build_rev\": \"" << "0.0.0" << "\","
+  //             << "\"prod_sn\": \"" << serial_number << "\","
+  //             << "\"prod_pn\": \"" << "0.0.0" << "\""
+  //             << "}"
+  //             << "}";
 
-  std::string json_string = json_stream.str();
+  // std::string json_string = json_stream.str();
 
-  // Create a ROS message
-  String msg;
-  msg.data = json_string;
+  // // Create a ROS message
+  // String msg;
+  // msg.data = json_string;
 
-  // Publish the message
-  (*pub)->publish(msg);
+  // // Publish the message
+  // (*pub)->publish(msg);
 }
 
 void Lddc::PublishPointcloud2(LidarDataQueue *queue, uint8_t index, const std::string& frame_id) {
