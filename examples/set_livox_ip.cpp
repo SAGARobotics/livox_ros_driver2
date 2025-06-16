@@ -22,8 +22,8 @@
 // SOFTWARE.
 //
 
-#include <ros/ros.h>
-#include <ros/package.h>
+#include "rclcpp/rclcpp.hpp"
+#include "ament_index_cpp/get_package_share_directory.hpp"
 #include "livox_lidar_def.h"
 #include "livox_lidar_api.h"
 #include <unistd.h>
@@ -75,10 +75,10 @@ void LidarInfoChangeCallback(const uint32_t handle, const LivoxLidarInfo* info, 
 
 int main(int argc, const char *argv[]) {
   if (argc != 3) {
-    printf("Params Invalid, must input config path.\n");
+    printf("Usage: %s <current_ip> <desired_ip>\n", argv[0]);
     return -1;
   }
-  std::string package_path = ros::package::getPath("livox_ros_driver2");
+  std::string package_path = ament_index_cpp::get_package_share_directory("livox_ros_driver2");
 
   std::string config = package_path + "/examples/mid360_config.json";
   current_ip = argv[1];

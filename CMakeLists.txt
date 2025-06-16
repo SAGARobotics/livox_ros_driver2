@@ -33,6 +33,7 @@ add_definitions(-DBUILDING_ROS2)
 # find_package(<dependency> REQUIRED)
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
+find_package(rclcpp REQUIRED)
 find_package(PCL REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(builtin_interfaces REQUIRED)
@@ -91,18 +92,18 @@ ament_auto_add_library(${PROJECT_NAME} SHARED
   src/call_back/livox_lidar_callback.cpp
 )
 
+add_executable(${PROJECT_NAME}_ip_set
+  examples/set_livox_ip.cpp
+)
+ament_target_dependencies(${PROJECT_NAME}_ip_set rclcpp ament_index_cpp)
+target_link_libraries(${PROJECT_NAME}_ip_set ${PROJECT_NAME})
+
 target_include_directories(${PROJECT_NAME} PRIVATE ${livox_sdk_INCLUDE_DIRS})
 
 # get include directories of custom msg headers
-# if(HUMBLE_ROS STREQUAL "humble")
 rosidl_get_typesupport_target(cpp_typesupport_target
 ${LIVOX_INTERFACES} "rosidl_typesupport_cpp")
 target_link_libraries(${PROJECT_NAME} "${cpp_typesupport_target}")
-# else()
-#   set(LIVOX_INTERFACE_TARGET "${LIVOX_INTERFACES}__rosidl_typesupport_cpp")
-#   add_dependencies(${PROJECT_NAME} ${LIVOX_INTERFACES})
-#   get_target_property(LIVOX_INTERFACES_INCLUDE_DIRECTORIES ${LIVOX_INTERFACE_TARGET} INTERFACE_INCLUDE_DIRECTORIES)
-# endif()
 
 # include file direcotry
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -145,4 +146,9 @@ endif()
 ament_auto_package(INSTALL_TO_SHARE
   config
   launch
+  examples
+)
+
+install(TARGETS ${PROJECT_NAME}_ip_set
+  DESTINATION lib/${PROJECT_NAME}
 )
