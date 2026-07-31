@@ -22,6 +22,7 @@
 // SOFTWARE.
 //
 
+#include <cstdint>
 #include "livox_lidar_upgrader.h"
 #include "../command_handler/command_impl.h"
 

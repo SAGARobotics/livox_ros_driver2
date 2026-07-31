@@ -22,6 +22,7 @@
 // SOFTWARE.
 //
 
+#include <cstdint>
 #include "logger_handler.h"
 
 #include <iostream>

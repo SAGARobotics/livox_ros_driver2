@@ -25,6 +25,7 @@
 #ifndef LIVOX_PARAMS_CHECK_H_
 #define LIVOX_PARAMS_CHECK_H_
 
+#include <cstdint>
 #include "livox_lidar_def.h"
 
 #include "comm/define.h"

@@ -22,6 +22,7 @@
 // SOFTWARE.
 //
 
+#include <cstdint>
 #include "debug_point_cloud_handler.h"
 
 #include "FastCRC/FastCRC.h"

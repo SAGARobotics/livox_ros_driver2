@@ -22,6 +22,7 @@
 // SOFTWARE.
 //
 
+#include <cstdint>
 #include "data_handler.h"
 #include <base/logging.h>
 

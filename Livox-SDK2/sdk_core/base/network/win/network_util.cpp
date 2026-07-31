@@ -23,6 +23,7 @@
 //
 
 #ifdef WIN32
+#include <cstdint>
 #include "base/network/network_util.h"
 #include <memory>
 #include <iphlpapi.h>

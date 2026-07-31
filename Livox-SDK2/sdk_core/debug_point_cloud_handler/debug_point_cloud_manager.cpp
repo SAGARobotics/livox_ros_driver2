@@ -1,3 +1,4 @@
+#include <cstdint>
 #include "debug_point_cloud_manager.h"
 
 #include "spdlog/fmt/fmt.h"

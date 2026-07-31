@@ -22,6 +22,7 @@
 // SOFTWARE.
 //
 
+#include <cstdint>
 #include "logger_manager.h"
 #include "file_manager.h"
 

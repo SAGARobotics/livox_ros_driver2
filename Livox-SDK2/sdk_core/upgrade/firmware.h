@@ -25,6 +25,7 @@
 #ifndef LIVOX_UPGRADE_FIRMWARE_H_
 #define LIVOX_UPGRADE_FIRMWARE_H_
 
+#include <cstdint>
 #include <fstream>
 #include <ios>
 

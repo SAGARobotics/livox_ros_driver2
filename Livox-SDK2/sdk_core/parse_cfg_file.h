@@ -25,6 +25,7 @@
 #ifndef LIVOX_PARSE_CFG_FILE_H_
 #define LIVOX_PARSE_CFG_FILE_H_
 
+#include <cstdint>
 #include "livox_lidar_def.h"
 
 #include "rapidjson/document.h"

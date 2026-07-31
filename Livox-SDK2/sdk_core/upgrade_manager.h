@@ -25,6 +25,7 @@
 #ifndef LIVOX_UPGRADE_MANAGER_H_
 #define LIVOX_UPGRADE_MANAGER_H_
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <fstream>

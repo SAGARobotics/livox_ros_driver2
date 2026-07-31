@@ -22,6 +22,7 @@
 // SOFTWARE.
 //
 
+#include <cstdint>
 #include "sdk_protocol.h"
 
 #include <stdio.h>

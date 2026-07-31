@@ -25,6 +25,7 @@
 #ifndef LIVOX_DATA_HANDLER_H_
 #define LIVOX_DATA_HANDLER_H_
 
+#include <cstdint>
 #include <array>
 #include <functional>
 #include <memory>

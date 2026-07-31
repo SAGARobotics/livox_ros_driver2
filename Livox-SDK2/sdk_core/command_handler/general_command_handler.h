@@ -25,6 +25,7 @@
 #ifndef GENERAL_COMMAND_HANDLER_H_
 #define GENERAL_COMMAND_HANDLER_H_
 
+#include <cstdint>
 #include <memory>
 #include <map>
 #include <condition_variable>

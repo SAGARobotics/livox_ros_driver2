@@ -25,6 +25,7 @@
 #ifndef LIVOX_COMMAND_CALLBACK_H
 #define LIVOX_COMMAND_CALLBACK_H
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include "livox_lidar_api.h"

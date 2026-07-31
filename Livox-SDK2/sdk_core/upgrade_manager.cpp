@@ -22,6 +22,7 @@
 // SOFTWARE.
 //
 
+#include <cstdint>
 #include "upgrade_manager.h"
 #include <thread>
 

@@ -25,6 +25,7 @@
 #ifndef DEBUG_POINT_CLOUD_MANAGER_H_
 #define DEBUG_POINT_CLOUD_MANAGER_H_
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <mutex>

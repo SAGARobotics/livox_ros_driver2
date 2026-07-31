@@ -24,6 +24,7 @@
 #ifndef LIVOX_BUILD_REQUEST_H_
 #define LIVOX_BUILD_REQUEST_H_
 
+#include <cstdint>
 #include <memory>
 #include <map>
 #include <list>

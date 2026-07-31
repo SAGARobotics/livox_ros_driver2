@@ -22,6 +22,7 @@
 // SOFTWARE.
 //
 
+#include <cstdint>
 #include "params_check.h"
 
 #include "livox_lidar_def.h"

@@ -1,4 +1,5 @@
 
+#include <cstdint>
 #include "parse_lidar_state_info.h"
 #include "base/logging.h"
 

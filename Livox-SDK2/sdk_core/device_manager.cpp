@@ -23,6 +23,7 @@
 //
 
 #ifdef _WIN32
+#include <cstdint>
 #include <winsock2.h>
 #else
 #include <arpa/inet.h>

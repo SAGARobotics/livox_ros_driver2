@@ -25,6 +25,7 @@
 #ifndef PARSE_LIDAR_STATE_INFO_H_
 #define PARSE_LIDAR_STATE_INFO_H_
 
+#include <cstdint>
 #include <memory>
 #include <map>
 #include <mutex>

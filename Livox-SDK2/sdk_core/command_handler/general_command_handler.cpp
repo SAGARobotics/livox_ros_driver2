@@ -22,6 +22,7 @@
 // SOFTWARE.
 //
 
+#include <cstdint>
 #include "general_command_handler.h"
 
 #include <iostream>

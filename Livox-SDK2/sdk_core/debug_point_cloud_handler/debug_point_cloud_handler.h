@@ -25,6 +25,7 @@
 #ifndef DEBUG_POINT_CLOUD_HANDLER_H_
 #define DEBUG_POINT_CLOUD_HANDLER_H_
 
+#include <cstdint>
 #include "base/io_thread.h"
 #include "base/noncopyable.h"
 #include "base/logging.h"
