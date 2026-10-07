@@ -133,14 +133,9 @@ rclcpp_components_register_node(${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # uncomment the line when a copyright and license is not present in all source files
-  #set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # uncomment the line when this package is not in a git repo
-  #set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
+  # livox_ros_driver2 is vendored upstream third-party code (Livox ROS Driver 2).
+  # Do not run ament linters over it: they report 200+ style/copyright/cmake
+  # failures on sources we do not maintain. No first-party tests exist here.
 endif()
 
 ament_auto_package(INSTALL_TO_SHARE
