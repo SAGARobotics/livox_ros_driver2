@@ -245,13 +245,23 @@ else(ROS_EDITION STREQUAL "ROS2")
     LIBRARY_NAME ${PROJECT_NAME}
   )
 
-  ## make sure the livox_lidar_sdk_shared library is installed
-  find_library(LIVOX_LIDAR_SDK_LIBRARY liblivox_lidar_sdk_shared.so /usr/local/lib REQUIRED)
-
-  ##
-  find_path(LIVOX_LIDAR_SDK_INCLUDE_DIR
-    NAMES "livox_lidar_api.h" "livox_lidar_def.h"
-    REQUIRED)
+  ## Build and install the bundled Livox-SDK2 into a private prefix before this package is compiled
+  include(ExternalProject)
+  set(LIVOX_SDK2_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/livox_sdk2_install)
+  ExternalProject_Add(livox_sdk2_ext
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK2
+    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/livox_sdk2_build
+    INSTALL_DIR ${LIVOX_SDK2_PREFIX}
+    CMAKE_ARGS
+      -DCMAKE_INSTALL_PREFIX=${LIVOX_SDK2_PREFIX}
+      -DCMAKE_BUILD_TYPE=Release
+      -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+      -DBUILD_SAMPLES=OFF
+    BUILD_BYPRODUCTS ${LIVOX_SDK2_PREFIX}/lib/liblivox_lidar_sdk_shared.so
+  )
+  set(LIVOX_LIDAR_SDK_LIBRARY ${LIVOX_SDK2_PREFIX}/lib/liblivox_lidar_sdk_shared.so)
+  set(LIVOX_LIDAR_SDK_INCLUDE_DIR ${LIVOX_SDK2_PREFIX}/include)
+  file(MAKE_DIRECTORY ${LIVOX_LIDAR_SDK_INCLUDE_DIR})
 
   ## PCL library
   link_directories(${PCL_LIBRARY_DIRS})
@@ -315,6 +325,13 @@ else(ROS_EDITION STREQUAL "ROS2")
     PLUGIN "livox_ros::DriverNode"
     EXECUTABLE ${PROJECT_NAME}_node
   )
+
+  # SDK must be built first, and its shared lib shipped with this package
+  add_dependencies(${PROJECT_NAME} livox_sdk2_ext)
+  set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN")
+  install(DIRECTORY ${LIVOX_SDK2_PREFIX}/lib/
+    DESTINATION lib
+    FILES_MATCHING PATTERN "liblivox_lidar_sdk_shared.so*")
 
   if(BUILD_TESTING)
     find_package(ament_lint_auto REQUIRED)
