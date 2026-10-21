@@ -104,6 +104,10 @@ if(ROS_EDITION STREQUAL "ROS1")
     ""
   )
 
+  add_executable(${PROJECT_NAME}_ip_set
+    examples/set_livox_ip.cpp
+  )
+
   #---------------------------------------------------------------------------------------
   # precompile macro and compile option
   #---------------------------------------------------------------------------------------
@@ -223,6 +227,7 @@ else(ROS_EDITION STREQUAL "ROS2")
   # find_package(<dependency> REQUIRED)
   find_package(ament_cmake_auto REQUIRED)
   ament_auto_find_build_dependencies()
+  find_package(ament_index_cpp REQUIRED)
   find_package(PCL REQUIRED)
   find_package(std_msgs REQUIRED)
   find_package(builtin_interfaces REQUIRED)
@@ -321,6 +326,15 @@ else(ROS_EDITION STREQUAL "ROS2")
     ${APR_LIBRARIES}
   )
 
+  add_executable(${PROJECT_NAME}_ip_set src/set_livox_ip_ros2.cpp)
+  target_include_directories(${PROJECT_NAME}_ip_set PRIVATE ${LIVOX_LIDAR_SDK_INCLUDE_DIR})
+  target_link_libraries(${PROJECT_NAME}_ip_set
+    ${LIVOX_LIDAR_SDK_LIBRARY}
+    ament_index_cpp::ament_index_cpp
+  )
+  add_dependencies(${PROJECT_NAME}_ip_set livox_sdk2_ext)
+  set_target_properties(${PROJECT_NAME}_ip_set PROPERTIES INSTALL_RPATH "$ORIGIN/..")
+
   rclcpp_components_register_node(${PROJECT_NAME}
     PLUGIN "livox_ros::DriverNode"
     EXECUTABLE ${PROJECT_NAME}_node
@@ -332,6 +346,7 @@ else(ROS_EDITION STREQUAL "ROS2")
   install(DIRECTORY ${LIVOX_SDK2_PREFIX}/lib/
     DESTINATION lib
     FILES_MATCHING PATTERN "liblivox_lidar_sdk_shared.so*")
+  install(TARGETS ${PROJECT_NAME}_ip_set DESTINATION lib/${PROJECT_NAME})
 
   if(BUILD_TESTING)
     find_package(ament_lint_auto REQUIRED)
