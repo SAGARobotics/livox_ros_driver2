@@ -25,10 +25,10 @@
 #ifndef LIVOX_FILE_MANAGER_
 #define LIVOX_FILE_MANAGER_
 
-#include <cstdint>
 #include <string>
 #include <vector>
 #include <map>
+#include <cstdint>
 
 namespace livox {
 namespace lidar {

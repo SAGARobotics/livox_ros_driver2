@@ -25,7 +25,6 @@
 #ifndef MID360_COMMAND_HANDLER_H_
 #define MID360_COMMAND_HANDLER_H_
 
-#include <cstdint>
 #include <memory>
 #include <map>
 #include <list>

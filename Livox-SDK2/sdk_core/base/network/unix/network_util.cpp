@@ -22,7 +22,6 @@
 // SOFTWARE.
 //
 #ifndef WIN32
-#include <cstdint>
 #include "base/network/network_util.h"
 #include <ifaddrs.h>
 #include <string>

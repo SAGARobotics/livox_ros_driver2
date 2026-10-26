@@ -22,7 +22,6 @@
 // SOFTWARE.
 //
 
-#include <cstdint>
 #include "sdk_protocol.h"
 
 #include <stdio.h>
@@ -122,6 +121,10 @@ bool SdkProtocol::CheckPreamble(uint8_t *buf, uint32_t buf_size) {
   }
 
   if (packet->length < GetPreambleLen()) {
+    return false;
+  }
+
+  if (packet->length > buf_size) {
     return false;
   }
 

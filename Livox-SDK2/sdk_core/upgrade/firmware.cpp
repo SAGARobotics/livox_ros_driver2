@@ -22,7 +22,6 @@
 // SOFTWARE.
 //
 
-#include <cstdint>
 #include <string.h>
 
 #include "firmware.h"

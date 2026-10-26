@@ -26,11 +26,11 @@
 #define LIVOX_DEFINE_H_
 
 #include <stdio.h>
-#include <cstdint>
 #include <string>
 #include <memory>
 #include <functional>
 #include <vector>
+#include <cstdint>
 #include <atomic>
 
 #include "livox_lidar_def.h"
@@ -68,7 +68,7 @@ typedef struct {
 
 typedef struct {
   std::vector<uint16_t> cmd_key_set;
-} GeneralCfgInfo;
+} GeneralCfgInfo; 
 
 typedef struct {
   uint8_t device_type;
@@ -93,7 +93,7 @@ typedef enum {
    */
   kCommandIDLidarSearch = 0x0000,
   // kCommandIDLidarPreconfig = 0x01,
-
+  
   kCommandIDLidarWorkModeControl = 0x0100,
   kCommandIDLidarGetInternalInfo = 0x0101,
   kCommandIDLidarPushMsg         = 0x0102,
@@ -142,7 +142,7 @@ typedef struct {
   uint32_t handle;
   uint16_t cmd_port;
   uint8_t dev_type;
-  std::atomic<bool> is_get={false};
+  std::atomic<bool> is_get={false}; 
   std::atomic<bool> is_set={false};
 } ViewDevice;
 
@@ -160,6 +160,9 @@ typedef struct {
   uint16_t host_imu_data_port;
 } ViewLidarIpInfo;
 
+typedef struct {
+  uint8_t server_ipaddr[4];
+} NTPServerIpInfoValue;
 
 typedef struct {
   uint8_t lidar_ipaddr[4];
@@ -209,6 +212,45 @@ static const uint16_t kPaLidarLogPort        = 1002;
 
 static const uint16_t kPaHostFaultPort = 42867;
 
+static const uint16_t kMid360sLidarCmdPort             = 56100;
+static const uint16_t kMid360sLidarPushMsgPort         = 56200;
+static const uint16_t kMid360sLidarPointCloudPort      = 56300;
+static const uint16_t kMid360sLidarImuDataPort         = 56400;
+static const uint16_t kMid360sLidarLogPort             = 56500;
+static const uint16_t kMid360sLidarDebugPointCloudPort = 60301;
+
+static const uint16_t kMid360sHostCmdPort        = 56101;
+static const uint16_t kMid360sHostPushMsgPort    = 56201;
+static const uint16_t kMid360sHostPointCloudPort = 56301;
+static const uint16_t kMid360sHostImuDataPort    = 56401;
+static const uint16_t kMid360sHostLogPort        = 56501;
+
+static const uint16_t kAvia2LidarCmdPort             = 56100;
+static const uint16_t kAvia2LidarPushMsgPort         = 56200;
+static const uint16_t kAvia2LidarPointCloudPort      = 56300;
+static const uint16_t kAvia2LidarImuDataPort         = 56400;
+static const uint16_t kAvia2LidarLogPort             = 56500;
+static const uint16_t kAvia2LidarDebugPointCloudPort = 60301;
+
+static const uint16_t kAvia2HostCmdPort        = 56101;
+static const uint16_t kAvia2HostPushMsgPort    = 56201;
+static const uint16_t kAvia2HostPointCloudPort = 56301;
+static const uint16_t kAvia2HostImuDataPort    = 56401;
+static const uint16_t kAvia2HostLogPort        = 56501;
+
+static const uint16_t kMid360lLidarCmdPort             = 56100;
+static const uint16_t kMid360lLidarPushMsgPort         = 56200;
+static const uint16_t kMid360lLidarPointCloudPort      = 56300;
+static const uint16_t kMid360lLidarImuDataPort         = 56400;
+static const uint16_t kMid360lLidarLogPort             = 56500;
+static const uint16_t kMid360lLidarDebugPointCloudPort = 60301;
+
+static const uint16_t kMid360lHostCmdPort        = 56101;
+static const uint16_t kMid360lHostPushMsgPort    = 56201;
+static const uint16_t kMid360lHostPointCloudPort = 56301;
+static const uint16_t kMid360lHostImuDataPort    = 56401;
+static const uint16_t kMid360lHostLogPort        = 56501;
+
 typedef enum {
   kCmd = 0,
   kPush = 1,
@@ -246,8 +288,8 @@ typedef struct {
   uint32_t timestamp;
   uint16_t rsvd;
   uint32_t trans_index;
-  uint16_t data_length;     // log data length
-  uint8_t  data[1];         //data of log
+  uint16_t data_length;     // log data length 
+  uint8_t  data[1];         //data of log  
 } DeviceLoggerFilePushRequest;
 
 typedef struct {
@@ -340,7 +382,7 @@ typedef struct {
 } LivoxLidarDebugPointCloudRequest;
 
 typedef struct {
-  enum class SyncTimeType : std::uint8_t {
+  enum class SyncTimeType : uint8_t {
     kRmcSyncTime = 2,
   } type;
   uint64_t ns;

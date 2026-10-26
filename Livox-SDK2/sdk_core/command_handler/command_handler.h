@@ -25,7 +25,6 @@
 #ifndef COMMAND_HANDLER_H_
 #define COMMAND_HANDLER_H_
 
-#include <cstdint>
 #include <memory>
 #include <map>
 #include <mutex>

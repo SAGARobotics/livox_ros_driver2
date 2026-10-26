@@ -25,7 +25,6 @@
 #ifndef LIVOX_LOGGER_MANAGER_H_
 #define LIVOX_LOGGER_MANAGER_H_
 
-#include <cstdint>
 #include <functional>
 #include <memory>
 #include <mutex>

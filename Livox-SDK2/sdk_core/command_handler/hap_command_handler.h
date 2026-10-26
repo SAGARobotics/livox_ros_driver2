@@ -25,7 +25,6 @@
 #ifndef HAP_COMMAND_HANDLER_H_
 #define HAP_COMMAND_HANDLER_H_
 
-#include <cstdint>
 #include <memory>
 #include <map>
 #include <list>

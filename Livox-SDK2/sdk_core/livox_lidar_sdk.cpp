@@ -22,7 +22,6 @@
 // SOFTWARE.
 //
 
-#include <cstdint>
 #include "livox_lidar_api.h"
 #include "livox_lidar_def.h"
 
@@ -275,6 +274,44 @@ livox_status StartForcedHeating(uint32_t handle, LivoxLidarAsyncControlCallback 
 
 livox_status StopForcedHeating(uint32_t handle, LivoxLidarAsyncControlCallback cb, void* client_data) {
   return CommandImpl::StopForcedHeating(handle, cb, client_data);
+}
+
+livox_status SetLidarFogNoiseFilterMode(uint32_t handle, LivoxFogNoiseFilterMode fog_filter_mode, LivoxLidarAsyncControlCallback cb, void* client_data) {
+  return CommandImpl::SetLidarFogNoiseFilterMode(handle, fog_filter_mode, cb, client_data);
+}
+
+livox_status SetLivoxLidarITOCtrlMode(uint32_t handle, LivoxLidarItoCtrlMode ito_mode, LivoxLidarAsyncControlCallback cb, void* client_data) {
+  return CommandImpl::SetLivoxLidarITOCtrlMode(handle, ito_mode, cb, client_data);
+}
+
+livox_status SetLivoxLidarPclFreqMod(uint32_t handle, LivoxLidarPclFreqMod pcl_freq_mod, LivoxLidarAsyncControlCallback cb, void* client_data) {
+  return CommandImpl::SetLivoxLidarPclFreqMod(handle, pcl_freq_mod, cb, client_data);
+}
+
+livox_status SetLivoxLidarTimeFilterMode(uint32_t handle, LivoxLidarTimeFilterMode time_filter_mode, LivoxLidarAsyncControlCallback cb, void* client_data) {
+  return CommandImpl::SetLivoxLidarTimeFilterMode(handle, time_filter_mode, cb, client_data);
+}
+
+livox_status SetLivoxLidarImuRange(uint32_t handle, LivoxLidarImuOutRate imu_out_rate,
+    LivoxLidarAccelRange accel_range, LivoxLidarGyroRange gyro_range,
+    LivoxLidarAsyncControlCallback cb, void* client_data) {
+  return CommandImpl::SetLivoxLidarImuRange(handle, imu_out_rate, accel_range, gyro_range, cb, client_data);
+}
+
+livox_status SetNTPServerIp(uint32_t handle, NTPServerIpInfo* server_ip, LivoxLidarAsyncControlCallback cb, void* client_data) {
+  return CommandImpl::SetNTPServerIp(handle, server_ip, cb, client_data);
+}
+
+livox_status SetLivoxLidarEscMode(uint32_t handle, LivoxLidarEscMode esc_mode, LivoxLidarAsyncControlCallback cb, void* client_data) {
+  return CommandImpl::SetLivoxLidarEscMode(handle, esc_mode, cb, client_data);
+}
+
+livox_status SetLivoxLidarFovMode(uint32_t handle, LivoxLidarFovMode fov_mode, LivoxLidarAsyncControlCallback cb, void* client_data) {
+  return CommandImpl::SetLivoxLidarFovMode(handle, fov_mode, cb, client_data);
+}
+
+livox_status SetLivoxLidarEchoMode(uint32_t handle, LivoxLidarEchoMode echo_mode, LivoxLidarAsyncControlCallback cb, void* client_data) {
+  return CommandImpl::SetLivoxLidarEchoMode(handle, echo_mode, cb, client_data);
 }
 
 livox_status EnableLivoxLidarImuData(uint32_t handle, LivoxLidarAsyncControlCallback cb, void* client_data) {

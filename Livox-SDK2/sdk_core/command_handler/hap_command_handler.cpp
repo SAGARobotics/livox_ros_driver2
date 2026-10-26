@@ -22,7 +22,6 @@
 // SOFTWARE.
 //
 
-#include <cstdint>
 #include "hap_command_handler.h"
 #include "livox_lidar_def.h"
 

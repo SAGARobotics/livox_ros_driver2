@@ -25,7 +25,6 @@
 #ifndef LIVOX_LOGGER_HANDLER_
 #define LIVOX_LOGGER_HANDLER_
 
-#include <cstdint>
 #include <string>
 #include <algorithm>
 #include <map>

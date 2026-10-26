@@ -22,7 +22,6 @@
 // SOFTWARE.
 //
 
-#include <cstdint>
 #include "file_manager.h"
 
 #ifdef WIN32

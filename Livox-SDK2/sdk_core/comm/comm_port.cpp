@@ -22,7 +22,6 @@
 // SOFTWARE.
 //
 
-#include <cstdint>
 #include "comm/comm_port.h"
 #include <stdio.h>
 #include <string.h>

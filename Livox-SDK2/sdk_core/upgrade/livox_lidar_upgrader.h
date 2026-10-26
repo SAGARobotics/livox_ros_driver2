@@ -25,7 +25,6 @@
 #ifndef LIVOX_LIDAR_UPGRADER_H_
 #define LIVOX_LIDAR_UPGRADER_H_
 
-#include <cstdint>
 #include <fstream>
 #include <ios>
 #include <memory>
