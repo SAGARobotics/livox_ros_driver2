@@ -6,6 +6,51 @@ Livox ROS Driver 2 is the 2nd-generation driver package used to connect LiDAR pr
 
   As a debugging tool, Livox ROS Driver is not recommended for mass production but limited to test scenarios. You should optimize the code based on the original source to meet your various needs.
 
+## Thorvald ROS2 utilities
+
+With the robot parked, stop the Livox driver before setting a lidar IP (both
+need UDP port 56000):
+
+```shell
+ros2 run livox_ros_driver2 livox_ros_driver2_ip_set 192.168.0.11 192.168.0.21
+```
+
+The default `examples/mid360_config.json` includes both Mid-360 and Mid-360S
+sections, using host `192.168.0.101`. The tool changes the IP only on the device
+matching the current IP. An optional third argument supplies a different SDK
+config path (for example, to use another host interface). Config-free discovery
+is not used because this SDK dereferences a null framework config in that mode.
+As before, the applied subnet mask is
+`255.255.255.0` and gateway is `192.168.0.1`. Ensure the destination address is
+unused and reachable on your network. Discovery/command failures or a 30-second
+timeout return a nonzero exit code. Success means the device acknowledged the IP
+change and reboot; allow it to restart and verify the new address separately.
+On failure after a command was sent, check both old and new addresses before
+retrying. Update the driver's per-IP config/remappings if keeping the new IP.
+
+Metadata is published as `std_msgs/msg/String` containing JSON on
+`livox/metadata_<IP with underscores>` when `multi_topic` is enabled, or
+`livox/metadata` otherwise, for both PointCloud2 and custom point-cloud output.
+Publishers belong to the driver instance and use the node's namespace/remappings.
+Thorvald's `robot_lidars.launch.py` remaps the `.10` metadata topic to
+`/scanner_back/metadata` and the `.11` metadata topic to `/scanner_front/metadata`,
+matching the point-cloud topic layout.
+The payload preserves the existing `sensor_info` schema:
+
+* `prod_sn`: device serial number.
+* `prod_line`: discovered device model (`MID360` or `MID360S`).
+* `build_rev`: application firmware version (`version_app`, key `0x8002`).
+* `prod_pn`: hardware version (`version_hardware`, key `0x8004`), used as the
+  part/version identifier because the protocol exposes no dedicated part number.
+
+Versions use the device's four-byte `a.b.c.d` representation and are queried
+asynchronously on discovery. Only the two version keys are requested through the
+bundled SDK's command handler: its public bulk query includes unrelated keys
+rejected by some Mid-360S firmware. Version fields are empty until reported, or if the
+query fails/the device omits them; failures and missing fields are logged.
+`product_info` is not used as a part number: it contains the model and production
+date, not a part number.
+
 ## 1. Preparation
 
 ### 1.1 OS requirements

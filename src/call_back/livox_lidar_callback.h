@@ -37,6 +37,9 @@ class LivoxLidarCallback {
   static void LidarInfoChangeCallback(const uint32_t handle,
                                       const LivoxLidarInfo* info,
                                       void* client_data);
+  static void QueryInternalInfoCallback(livox_status status, uint32_t handle,
+                                       LivoxLidarDiagInternalInfoResponse* response,
+                                       void* client_data);
   static void WorkModeChangedCallback(livox_status status,
                                       uint32_t handle,
                                       LivoxLidarAsyncControlResponse *response,

@@ -23,6 +23,25 @@
       "log_data_port": 56502
     }
   },
+  "Mid360s": {
+    "lidar_net_info": {
+      "cmd_data_port": 56100,
+      "push_msg_port": 56200,
+      "point_data_port": 56300,
+      "imu_data_port": 56400,
+      "log_data_port": 56500
+    },
+    "host_net_info": [
+      {
+        "host_ip": "192.168.0.101",
+        "cmd_data_port": 56602,
+        "push_msg_port": 56702,
+        "point_data_port": 56802,
+        "imu_data_port": 56902,
+        "log_data_port": 57002
+      }
+    ]
+  },
   "lidar_configs" : [
     {
       "ip" : "192.168.0.11",

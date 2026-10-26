@@ -273,6 +273,7 @@ typedef struct {
 typedef struct {
   std::string   sn;
   std::string   lidar_ip;
+  std::string   product_line;
   std::string   hw_version;
   std::string   fw_version;
 } LidarDeviceInfo;

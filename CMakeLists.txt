@@ -98,7 +98,11 @@ add_executable(${PROJECT_NAME}_ip_set
 ament_target_dependencies(${PROJECT_NAME}_ip_set rclcpp ament_index_cpp)
 target_link_libraries(${PROJECT_NAME}_ip_set ${PROJECT_NAME})
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${livox_sdk_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PRIVATE
+  ${livox_sdk_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK2/sdk_core
+  ${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK2/3rdparty
+)
 
 # get include directories of custom msg headers
 rosidl_get_typesupport_target(cpp_typesupport_target
@@ -135,7 +139,11 @@ rclcpp_components_register_node(${PROJECT_NAME}
 if(BUILD_TESTING)
   # livox_ros_driver2 is vendored upstream third-party code (Livox ROS Driver 2).
   # Do not run ament linters over it: they report 200+ style/copyright/cmake
-  # failures on sources we do not maintain. No first-party tests exist here.
+  # failures on sources we do not maintain. Test Thorvald behavior directly.
+  enable_testing()
+  add_executable(livox_metadata_versions_test tests/metadata_versions_test.cpp)
+  target_link_libraries(livox_metadata_versions_test ${PROJECT_NAME})
+  add_test(NAME livox_metadata_versions COMMAND livox_metadata_versions_test)
 endif()
 
 ament_auto_package(INSTALL_TO_SHARE
