@@ -22,37 +22,60 @@
 // SOFTWARE.
 //
 
-#include <ros/ros.h>
-#include <ros/package.h>
 #include "livox_lidar_def.h"
 #include "livox_lidar_api.h"
-#include <unistd.h>
+#include "ament_index_cpp/get_package_share_directory.hpp"
 #include <arpa/inet.h>
-#include <cstddef>
+#include <atomic>
+#include <condition_variable>
+#include <fstream>
+#include <mutex>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <thread>
+#include <string>
 #include <chrono>
-#include <iostream>
 
 std::string current_ip, desired_ip;
+std::atomic<bool> request_started{false};
+std::mutex result_mutex;
+std::condition_variable result_ready;
+bool finished = false;
+bool succeeded = false;
+
+void Finish(bool success) {
+  {
+    std::lock_guard<std::mutex> lock(result_mutex);
+    finished = true;
+    succeeded = success;
+  }
+  result_ready.notify_one();
+}
 
 void RebootCallback(livox_status status, uint32_t handle, LivoxLidarRebootResponse* response, void* client_data) {
-  if (response == nullptr) {
+  if (status != kLivoxLidarStatusSuccess || response == nullptr || response->ret_code != 0) {
+    fprintf(stderr, "Lidar reboot failed: status=%d, ret_code=%d. IP may already be stored; verify the device before retrying.\n",
+            status, response ? response->ret_code : -1);
+    Finish(false);
     return;
   }
+  printf("Lidar acknowledged reboot to apply %s -> %s.\n", current_ip.c_str(), desired_ip.c_str());
+  Finish(true);
 }
 
 void SetIpInfoCallback(livox_status status, uint32_t handle, LivoxLidarAsyncControlResponse *response, void *client_data) {
-  if (response == nullptr) {
+  if (status != kLivoxLidarStatusSuccess || response == nullptr ||
+      response->ret_code != 0 || response->error_key != 0) {
+    fprintf(stderr, "Set lidar IP failed: status=%d, ret_code=%d, error_key=%d.\n",
+            status, response ? response->ret_code : -1, response ? response->error_key : -1);
+    Finish(false);
     return;
   }
-  if (response->ret_code == 0 && response->error_key == 0) {
-    LivoxLidarRequestReboot(handle, RebootCallback, nullptr);
+  livox_status reboot_status = LivoxLidarRequestReboot(handle, RebootCallback, nullptr);
+  if (reboot_status != kLivoxLidarStatusSuccess) {
+    fprintf(stderr, "Could not request lidar reboot: status=%d. IP may already be stored.\n", reboot_status);
+    Finish(false);
   }
 }
-
 
 void LidarInfoChangeCallback(const uint32_t handle, const LivoxLidarInfo* info, void* client_data) {
   if (info == nullptr) {
@@ -60,42 +83,79 @@ void LidarInfoChangeCallback(const uint32_t handle, const LivoxLidarInfo* info, 
     return;
   }
 
-  if(info->lidar_ip == current_ip)
+  if (current_ip == info->lidar_ip && !request_started.exchange(true))
   {
-    printf("LidarInfoChangeCallback Lidar handle: %u SN: %s\n", handle, info->sn);
-    printf("Livox Lidar found: %s\n", info->lidar_ip);
+    printf("Livox lidar found: %s, SN: %s, device type: %u\n",
+           info->lidar_ip, info->sn, info->dev_type);
 
-    LivoxLidarIpInfo lidar_ip_info;
+    LivoxLidarIpInfo lidar_ip_info{};
     strcpy(lidar_ip_info.ip_addr, desired_ip.c_str());
     strcpy(lidar_ip_info.net_mask, "255.255.255.0");
     strcpy(lidar_ip_info.gw_addr, "192.168.0.1");
-    SetLivoxLidarIp(handle, &lidar_ip_info, SetIpInfoCallback, nullptr);
+    livox_status status = SetLivoxLidarIp(handle, &lidar_ip_info, SetIpInfoCallback, nullptr);
+    if (status != kLivoxLidarStatusSuccess) {
+      fprintf(stderr, "Could not request lidar IP change: status=%d.\n", status);
+      Finish(false);
+    }
   }
 }
 
-int main(int argc, const char *argv[]) {
-  if (argc != 3) {
-    printf("Params Invalid, must input config path.\n");
-    return -1;
+bool IsValidUnicastIp(const char* text) {
+  in_addr address{};
+  if (strlen(text) >= sizeof(LivoxLidarIpInfo{}.ip_addr) ||
+      inet_pton(AF_INET, text, &address) != 1) {
+    return false;
   }
-  std::string package_path = ros::package::getPath("livox_ros_driver2");
+  uint32_t ip = ntohl(address.s_addr);
+  return (ip >> 24) != 0 && (ip >> 24) != 127 && (ip >> 24) < 224 &&
+         (ip & 0xff) != 0 && (ip & 0xff) != 255;
+}
 
-  std::string config = package_path + "/examples/mid360_config.json";
+int main(int argc, const char *argv[]) {
+  if (argc != 3 && argc != 4) {
+    fprintf(stderr, "Usage: %s <current_ip> <desired_ip> [config.json]\n"
+                    "Default config: examples/mid360_config.json; applies mask 255.255.255.0 and gateway 192.168.0.1.\n",
+            argv[0]);
+    return 1;
+  }
+  if (!IsValidUnicastIp(argv[1]) || !IsValidUnicastIp(argv[2]) ||
+      strcmp(argv[1], argv[2]) == 0) {
+    fprintf(stderr, "Expected distinct usable unicast IPv4 addresses.\n");
+    return 1;
+  }
+
   current_ip = argv[1];
   desired_ip = argv[2];
+  std::string config = argc == 4 ? argv[3] :
+      ament_index_cpp::get_package_share_directory("livox_ros_driver2") + "/examples/mid360_config.json";
+  std::ifstream config_file(config);
+  if (!config_file) {
+    fprintf(stderr, "Cannot read SDK config: %s\n", config.c_str());
+    return 1;
+  }
+  config_file.close();
 
-  // REQUIRED, to init Livox SDK2
+  // Config-free discovery crashes in this SDK; the default config covers both models.
   if (!LivoxLidarSdkInit(config.c_str())) {
-    printf("Livox Init Failed\n");
+    fprintf(stderr, "Livox SDK init failed; check host IP and that no driver owns port 56000.\n");
     LivoxLidarSdkUninit();
-    return -1;
+    return 1;
   }
 
   SetLivoxLidarInfoChangeCallback(LidarInfoChangeCallback, nullptr);
 
-  sleep(5);
+  bool success = false;
+  {
+    std::unique_lock<std::mutex> lock(result_mutex);
+    if (!result_ready.wait_for(lock, std::chrono::seconds(30), [] { return finished; })) {
+      fprintf(stderr, "Timed out changing %s -> %s (%s). Verify both addresses before retrying.\n",
+              current_ip.c_str(), desired_ip.c_str(),
+              request_started.load() ? "request sent" : "target not discovered");
+    } else {
+      success = succeeded;
+    }
+  }
 
   LivoxLidarSdkUninit();
-  printf("Livox IP reconfigured!\n");
-  return 0;
+  return success ? 0 : 1;
 }

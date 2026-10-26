@@ -61,6 +61,7 @@ using ImuMsg = sensor_msgs::Imu;
 template <typename MessageT> using Publisher = rclcpp::Publisher<MessageT>;
 using PublisherPtr = std::shared_ptr<rclcpp::PublisherBase>;
 using PointCloud2 = sensor_msgs::msg::PointCloud2;
+using String = std_msgs::msg::String;
 using PointField = sensor_msgs::msg::PointField;
 using CustomMsg = livox_ros_driver2::msg::CustomMsg;
 using CustomPoint = livox_ros_driver2::msg::CustomPoint;
@@ -111,7 +112,7 @@ class Lddc final {
   void InitPointcloud2MsgHeader(PointCloud2& cloud, const std::string& frame_id);
   void InitPointcloud2Msg(const StoragePacket& pkg, PointCloud2& cloud, uint64_t& timestamp, const std::string& frame_id);
   void PublishPointcloud2Data(const uint8_t index, uint64_t timestamp, const PointCloud2& cloud);
-  void PublishMetaData(const uint8_t index, const std::string& serial_number);
+  void PublishMetaData(const uint8_t index);
 
   void InitCustomMsg(CustomMsg& livox_msg, const StoragePacket& pkg, uint8_t index, const std::string& frame_id);
   void FillPointsToCustomMsg(CustomMsg& livox_msg, const StoragePacket& pkg);
@@ -154,6 +155,8 @@ class Lddc final {
   PublisherPtr global_meta_pub_;
   rosbag::Bag *bag_;
 #elif defined BUILDING_ROS2
+  Publisher<String>::SharedPtr private_meta_pub_[kMaxSourceLidar];
+  Publisher<String>::SharedPtr global_meta_pub_;
   PublisherPtr private_pub_[kMaxSourceLidar];
   PublisherPtr global_pub_;
   PublisherPtr private_imu_pub_[kMaxSourceLidar];

@@ -36,6 +36,8 @@
 
 #include "driver_node.h"
 #include "lds_lidar.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
 #include <string>
 
 namespace livox_ros {
@@ -177,13 +179,13 @@ void Lddc::PollingLidarPointCloudData(uint8_t index, LidarDevice *lidar) {
     if (kPointCloud2Msg == transfer_format_) {
       // PublishPointcloud2(p_queue, index);
       PublishPointcloud2(p_queue, index, lidar->livox_config.frame_id);
-      PublishMetaData(index, lidar->info.sn );
 
     } else if (kLivoxCustomMsg == transfer_format_) {
       PublishCustomPointcloud(p_queue, index, lidar->livox_config.frame_id);
     } else if (kPclPxyziMsg == transfer_format_) {
       PublishPclMsg(p_queue, index, lidar->livox_config.frame_id);
     }
+    PublishMetaData(index);
   }
 }
 
@@ -209,19 +211,39 @@ void Lddc::PrepareExit(void) {
   }
 }
 
-void Lddc::PublishMetaData(const uint8_t index, const std::string& serial_number) {
+void Lddc::PublishMetaData(const uint8_t index) {
+  LidarDeviceInfo info;
+  {
+    std::lock_guard<std::mutex> lock(lds_->info_mutex_);
+    info = lds_->lidars_[index].info;
+  }
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  writer.StartObject();
+  writer.Key("sensor_info");
+  writer.StartObject();
+  writer.Key("prod_line");
+  writer.String(info.product_line.c_str());
+  writer.Key("build_rev");
+  writer.String(info.fw_version.c_str());
+  writer.Key("prod_sn");
+  writer.String(info.sn.c_str());
+  writer.Key("prod_pn");
+  writer.String(info.hw_version.c_str());
+  writer.EndObject();
+  writer.EndObject();
+  std::string json_string = buffer.GetString();
+
+#ifdef BUILDING_ROS1
   ros::Publisher **pub = nullptr;
   uint32_t queue_size = kMinEthPacketQueueSize;
 
-  if (use_multi_topic_)
-  {
+  if (use_multi_topic_) {
     pub = &private_meta_pub_[index];
-    queue_size = queue_size / 8; // queue size is 4 for only one lidar
-  }
-  else
-  {
+    queue_size = queue_size / 8;
+  } else {
     pub = &global_meta_pub_;
-    queue_size = queue_size * 8; // shared queue size is 256, for all lidars
+    queue_size = queue_size * 8;
   }
 
   if (*pub == nullptr) {
@@ -230,7 +252,7 @@ void Lddc::PublishMetaData(const uint8_t index, const std::string& serial_number
     if (use_multi_topic_) {
       std::string ip_string = IpNumToString(lds_->lidars_[index].handle);
       snprintf(name_str, sizeof(name_str), "livox/metadata_%s",
-               ReplacePeriodByUnderline(ip_string).c_str());
+              ReplacePeriodByUnderline(ip_string).c_str());
       DRIVER_INFO(*cur_node_, "Support multi topics.");
     } else {
       DRIVER_INFO(*cur_node_, "Support only one topic.");
@@ -238,32 +260,33 @@ void Lddc::PublishMetaData(const uint8_t index, const std::string& serial_number
     }
 
     *pub = new ros::Publisher;
-    **pub =
-        cur_node_->GetNode().advertise<String>(name_str, queue_size);
+    **pub = cur_node_->GetNode().advertise<String>(name_str, queue_size);
     DRIVER_INFO(*cur_node_,
         "%s publish use String format, set ROS publisher queue size %d",
         name_str, queue_size);
   }
 
-  // Manually create a JSON string
-  std::ostringstream json_stream;
-  json_stream << "{"
-              << "\"sensor_info\": {"
-              << "\"prod_line\": \"" << "MID360" << "\","
-              << "\"build_rev\": \"" << "0.0.0" << "\","
-              << "\"prod_sn\": \"" << serial_number << "\","
-              << "\"prod_pn\": \"" << "0.0.0" << "\""
-              << "}"
-              << "}";
-
-  std::string json_string = json_stream.str();
-
-  // Create a ROS message
   String msg;
   msg.data = json_string;
-
-  // Publish the message
   (*pub)->publish(msg);
+
+#elif defined BUILDING_ROS2
+  auto& pub = use_multi_topic_ ? private_meta_pub_[index] : global_meta_pub_;
+  if (!pub) {
+    std::string topic_name = "livox/metadata";
+    uint32_t queue_size = kMinEthPacketQueueSize * 8;
+    if (use_multi_topic_) {
+      topic_name += "_" + ReplacePeriodByUnderline(IpNumToString(lds_->lidars_[index].handle));
+      queue_size = kMinEthPacketQueueSize / 8;
+    }
+    pub = cur_node_->create_publisher<String>(topic_name, queue_size);
+    DRIVER_INFO(*cur_node_, "%s publish use String format, set ROS2 publisher queue size %d",
+                topic_name.c_str(), queue_size);
+  }
+  String msg;
+  msg.data = json_string;
+  pub->publish(msg);
+#endif
 }
 
 void Lddc::PublishPointcloud2(LidarDataQueue *queue, uint8_t index, const std::string& frame_id) {

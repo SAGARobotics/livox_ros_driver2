@@ -29,8 +29,6 @@
 #include "../lds_lidar.h"
 #include "../comm/comm.h"
 
-#include "livox_lidar_api.h"
-#include "livox_lidar_def.h"
 
 namespace livox_ros {
 
@@ -39,6 +37,9 @@ class LivoxLidarCallback {
   static void LidarInfoChangeCallback(const uint32_t handle,
                                       const LivoxLidarInfo* info,
                                       void* client_data);
+  static void QueryInternalInfoCallback(livox_status status, uint32_t handle,
+                                       LivoxLidarDiagInternalInfoResponse* response,
+                                       void* client_data);
   static void WorkModeChangedCallback(livox_status status,
                                       uint32_t handle,
                                       LivoxLidarAsyncControlResponse *response,

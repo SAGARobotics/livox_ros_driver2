@@ -28,6 +28,7 @@
 #define LIVOX_ROS_DRIVER_LDS_H_
 
 #include <map>
+#include <mutex>
 
 #include "comm/semaphore.h"
 #include "comm/comm.h"
@@ -68,6 +69,7 @@ class Lds {
  public:
   uint8_t lidar_count_;                 /**< Lidar access handle. */
   LidarDevice lidars_[kMaxSourceLidar]; /**< The index is the handle */
+  std::mutex info_mutex_;
   Semaphore pcd_semaphore_;
   Semaphore imu_semaphore_;
   static CacheIndex cache_index_;
